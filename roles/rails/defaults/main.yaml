@@ -1,0 +1,3 @@
+db_user: '{{ user }}'
+db_password: dbpassword
+db_name: '{{app_name}}'

@@ -6,10 +6,9 @@
 
 - name: add environment variables to bash profile
   lineinfile: dest=/home/{{ user }}/.bash_profile create=true regexp={{ item.key }} line='export {{ item.key }}={{ item.value }}'
-  with_dict: environment_variables
-  when: environment_variables is defined
+  with_dict: '{{environment_variables | default({}) }}'
 
 - name: creates apps directory
   file: path=/var/local/apps/ owner={{user}} group={{user}} state=directory
 
-- authorized_key: user={{user}} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+- authorized_key: user={{user}} key=https://github.com/{{github_user}}.keys

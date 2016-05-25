@@ -6,13 +6,13 @@
   register: bundler
 
 - name: migrate the database
-  shell: . ~/.bash_profile && bundle exec rake db:migrate RAILS_ENV={{ rails_env }} chdir={{ app_path }}
+  shell: bundle exec rake db:migrate RAILS_ENV={{ rails_env }} chdir={{ app_path }}
 
 - name: compile assets
   command: bundle exec rake assets:precompile RAILS_ENV={{ rails_env }} chdir={{ app_path }}
 
 - name: registers puma pid
-  command: cat tmp/pids/puma.pid chdir={{ app_path }}
+  command: cat {{app_path}}/tmp/pids/puma.pid chdir={{ app_path }}
   register: puma_pid
   when: bundler.stdout.find("puma") != -1
 
@@ -21,7 +21,7 @@
   when: bundler.stdout.find("puma") != -1
 
 - name: registers unicorn pid
-  command: cat tmp/pids/unicorn.pid chdir={{ app_path }}
+  command: cat {{app_path}}/tmp/pids/unicorn.pid chdir={{ app_path }}
   register: unicorn_pid
   when: bundler.stdout.find("unicorn") != -1
 

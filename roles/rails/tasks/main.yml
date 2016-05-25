@@ -11,15 +11,18 @@
 - name: changes app path owner
   file: path={{app_path}} recurse=yes owner={{user}}
 
+- name: Create config/database.yml
+  template: src=database.yml.j2 dest={{ app_path }}/config/database.yml owner={{ user }} mode=0600 backup=yes
+
 - name: bundle install
-  sudo_user: "{{ user }}"
+  become_user: "{{ user }}"
   command: bundle install --deployment chdir={{ app_path }}
   register: bundler
 
 - name: setups database
-  sudo_user: "{{ user }} -i"
-  command: bundle exec rake db:migrate RAILS_ENV={{rails_env}} chdir={{app_path}}
+  become_user: "{{ user }} -i"
+  command: bundle exec rake db:create db:migrate RAILS_ENV={{rails_env}} chdir={{app_path}}
 
 - name: compile assets
-  sudo_user: "{{ user }}"
+  become_user: "{{ user }}"
   command: bundle exec rake assets:precompile RAILS_ENV={{ rails_env }} chdir={{ app_path }}

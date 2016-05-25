@@ -19,3 +19,5 @@ localhost
 app_path=/app
 rails_env=development
 user=vagrant
+repository=git@bitbucket.org:melfassy/foreverlabs.git
+app_name=foreverlabs

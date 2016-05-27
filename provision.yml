@@ -16,5 +16,6 @@
     - rails
     - puma
     - nginx
+    - andreaswolf.letsencrypt
     - sidekiq
     - redis

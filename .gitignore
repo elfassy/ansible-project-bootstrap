@@ -2,3 +2,5 @@
 inventory/production/*
 provision_*
 deploy_*
+
+group_vars/production/config.yml

@@ -1,0 +1,3 @@
+---
+
+puma_config_path: "{{ app_path }}/config/puma.provisioned.rb"

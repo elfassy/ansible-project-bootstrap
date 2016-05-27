@@ -28,17 +28,27 @@ server {
   {% else %}
   listen 80 default_server;
   {% endif %}
+
   keepalive_timeout 5;
+
   {% if app_path is defined %}
   root {{ app_path }}/public;
   try_files $uri $uri.html $uri/index.html @app;
   {% else %}
   try_files $uri @app;
   {% endif %}
+
   {% if max_upload_size is defined %}
   client_max_body_size {{ max_upload_size }};
   {% endif %}
- 
+
+  {% if ssl_on %}
+  listen 443 ssl;
+  ssl_certificate {{ ssl_certificate_path }};
+  ssl_certificate_key {{ ssl_certificate_key_path }};
+  ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;  # do not use SSLv3 ref: POODLE
+  {% endif %}
+
   location /assets {
     gzip_static on;
     expires max;
@@ -49,8 +59,15 @@ server {
   }
   
   location @app {
+    {% if ssl_on %}
+    proxy_set_header X-Forwarded-Proto https;
+    {% endif %}
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
     proxy_pass http://{{ app_name }};
+  }
+
+  location /.well-known/acme-challenge {
+    alias {{ acme_tiny_challenges_directory }};
   }
 }

@@ -11,11 +11,16 @@
   template: src=puma.conf.j2 dest=/etc/puma.conf mode=644
 
 - name: adds puma app conf
-  template: src=puma.rb.j2 dest={{ app_path }}/config/puma.provisioned.rb mode=644
+  template: src=puma.rb.j2 dest={{puma_config_path}} mode=644
   notify: restart puma
 
 - name: creates puma pid folder
   file: path={{app_path}}/tmp/pids owner={{user}} group={{user}} state=directory
 
-- name: adds puma to upstart
+- name: adds puma to traditional sysvinit scripts upstart
+  become_user: 'root'
   command: update-rc.d -f puma defaults
+
+# - name: adds puma to upstart
+#   template: src=upstart.conf.j2 dest=/etc/init/puma.conf
+#   notify: restart puma

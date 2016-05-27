@@ -28,7 +28,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.limit = 'all'
     ansible.inventory_path = "inventory/development"
-    ansible.playbook = "#{ENV['PLAYBOOK']}.yml"
+    ansible.playbook = "#{ENV['PLAYBOOK'] || 'provision'}.yml"
   end
   config.ssh.forward_agent = true
 end

@@ -3,7 +3,7 @@
   apt: pkg=nginx
 
 - name: removes the default app
-  command: rm -f /etc/nginx/sites-enabled/default
+  file: path=/etc/nginx/sites-enabled/default state=absent
 
 - name: adds http conf
   template: src=http.conf.j2 dest=/etc/nginx/conf.d/http.conf force=true

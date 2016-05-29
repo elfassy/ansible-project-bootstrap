@@ -1,0 +1,8 @@
+---
+
+rails_env: production
+user: deployer
+environment_variables:
+  HOST: yourwebsite.com
+  ENCRYPTION_KEY: some_key
+  LANG: en_US.UTF-8

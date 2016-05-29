@@ -1,2 +1,0 @@
-- name: restart unicorn
-  service: name=unicorn state=restarted

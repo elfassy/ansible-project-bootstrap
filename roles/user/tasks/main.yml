@@ -1,0 +1,16 @@
+- name: creates deploy user
+  user: name={{user}} shell=/bin/bash
+
+- name: sets home owner
+  file: owner={{user}} path=/home/{{user}} recurse=yes state=directory
+
+- name: add environment variables
+  lineinfile: dest=/etc/environment create=true regexp={{ item.key }} line='export {{ item.key }}={{ item.value }}'
+  with_dict: '{{environment_variables | default({}) }}'
+  no_log: true
+
+- name: creates apps directory
+  file: path={{app_path}} owner={{user}} group={{user}} state=directory
+
+- authorized_key: user={{user}} key=https://github.com/{{github_user}}.keys
+

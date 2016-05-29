@@ -10,5 +10,12 @@
 
 - name: grants access for database to user
   become_user: postgres
-  postgresql_user: name={{ user }} role_attr_flags=SUPERUSER,LOGIN,CREATEDB password=password state=present
-  when: user is defined
+  postgresql_user: name={{db_user}} password={{db_password}} role_attr_flags=SUPERUSER,LOGIN,CREATEDB state=present
+
+- name: Create postgresql database
+  postgresql_db: name={{ db_name }} owner={{ db_user }}
+  become_user: postgres
+  
+- name: Create postgresql test database
+  postgresql_db: name={{ db_name }}_test owner={{ db_user }}
+  become_user: postgres

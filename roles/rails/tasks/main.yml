@@ -19,7 +19,6 @@
   command: bundle install --deployment chdir={{ app_path }}
   register: bundler
 
-# not sure why this fails... not seeing env vars
 - name: setups database
   become_user: "{{ user }}"
   command: bundle exec rake db:create db:migrate RAILS_ENV={{rails_env}} chdir={{app_path}}

@@ -158,14 +158,13 @@
   command: ./renew-certs.py
   args:
     chdir: "{{ acme_tiny_data_directory }}"
-  become_user: "{{ user }}"
+  become_user: "{{ letsencrypt_user }}"
   register: generate_initial_cert
   failed_when: (generate_initial_cert.stdout is defined and
-    ('error' in generate_initial_cert.stdout or 'Error' in generate_initial_cert.stdout
-      or 'Error' in generate_initial_cert.stderr))
+    ('error' in generate_initial_cert.stdout or 'Error' in generate_initial_cert.stdout or 'Error' in generate_initial_cert.stderr)) or
+    'FAILURE' in generate_initial_cert.msg
   tags: ['letsencrypt_keys']
 
-# this step might be failing silently
 - name: generated chained certificates
   shell: cat {{ item.certpath }} {{ letsencrypt_intermediate_cert_path }} > {{ item.chainedcertpath }}
   args:
@@ -186,5 +185,5 @@
     state: present
     name: "letsencrypt certificate renewal"
     user: "{{ letsencrypt_user }}"
-
+  
 ...

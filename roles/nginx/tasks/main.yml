@@ -11,8 +11,15 @@
 
 - name: adds app conf
   template: src=nginx.conf.j2 dest=/etc/nginx/sites-enabled/{{app_name}} force=true
+  vars:
+    ssl_on: false
   notify: restart nginx
 
 - name: enable nginx stats
   template: src=nginx-stats.conf.j2 dest=/etc/nginx/sites-enabled/nginx-stats.conf 
   notify: restart nginx
+
+- name: check nginx
+  command: nginx -t
+  register: nginx_status
+- debug: msg=nginx_status

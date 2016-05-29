@@ -1,0 +1,3 @@
+---
+sidekiq_app_name: "{{app_name}}_sidekiq"
+sidekiq_command: sidekiq

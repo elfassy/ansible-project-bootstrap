@@ -1,8 +1,9 @@
 - name: updates apt
   apt: update_cache=yes
 
-- name: install compilation packages
+- name: install essential packages
   apt: pkg={{item}}
   with_items:
     - autoconf
     - build-essential
+    - language-pack-en

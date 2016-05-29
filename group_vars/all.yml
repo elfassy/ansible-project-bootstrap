@@ -1,0 +1,19 @@
+---
+
+app_name: your_app_name
+github_user: elfassy #to add your ssh keys
+repository: git@bitbucket.org:user/app_name.git
+user: ubuntu
+app_path: /apps/{{app_name}}
+webmaster_email: webmaster@yourapp.com
+ssl_certificate_path: "/etc/ssl/certs/{{app_name}}.pem"
+ssl_certificate_key_path: "/etc/ssl/private/{{app_name}}.key"
+acme_tiny_challenges_directory: /apps/{{app_name}}/public/acme-challenge
+letsencrypt_certs:
+  -
+    name: "{{app_name}}_keys"
+    keypath: "{{ssl_certificate_key_path}}"
+    certpath: "/etc/ssl/certs/{{app_name}}.cert"
+    chainedcertpath: "{{ssl_certificate_path}}"
+    host: "your_web_site.com"
+

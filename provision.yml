@@ -7,8 +7,6 @@
 
 - hosts: web
   become: true
-  vars:
-    ruby_version: 2.2.2
   roles:
     - dev
     - git
@@ -16,6 +14,6 @@
     - rails
     - puma
     - nginx
-    - andreaswolf.letsencrypt
-    - sidekiq
     - redis
+    - sidekiq
+    - ssl

@@ -1,0 +1,6 @@
+- name: adds ssl to app conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/sites-enabled/{{app_name}} force=true
+  vars:
+    ssl_on: true
+  notify: restart nginx
+

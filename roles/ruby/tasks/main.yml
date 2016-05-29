@@ -14,7 +14,8 @@
 
 - name: extracts ruby source code
   command: tar -xvzf /var/local/ruby-{{ruby_version}}.tar.gz chdir=/var/local creates=/var/local/ruby-{{ruby_version}}
-
+  # unarchive: src=/var/local/ruby-{{ruby_version}}.tar.gz dest=/var/local
+  
 - name: configures ruby
   command: ./configure chdir=/var/local/ruby-{{ruby_version}} creates=/var/local/ruby-{{ruby_version}}/Makefile
 

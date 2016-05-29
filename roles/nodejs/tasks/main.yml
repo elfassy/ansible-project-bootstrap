@@ -1,15 +1,16 @@
 ---
 - name: downloads node source code
-  get_url: url=http://nodejs.org/dist/v0.10.32/node-v0.10.32.tar.gz dest=/var/local/node-v0.10.32.tar.gz
+  get_url: url=http://nodejs.org/dist/v{{node_version}}/node-v{{node_version}}.tar.gz dest=/var/local/node-v{{node_version}}.tar.gz
 
 - name: extracts node source code
-  command: tar -xvzf /var/local/node-v0.10.32.tar.gz chdir=/var/local creates=/var/local/node-v0.10.32
+  command: tar -xvzf /var/local/node-v{{node_version}}.tar.gz chdir=/var/local creates=/var/local/node-v{{node_version}}
+  # unarchive: src=/var/local/node-v{{node_version}}.tar.gz dest=/var/local
 
 - name: configures node
-  command: ./configure chdir=/var/local/node-v0.10.32 creates=/var/local/node-v0.10.32/Makefile
+  command: ./configure chdir=/var/local/node-v{{node_version}} creates=/var/local/node-v{{node_version}}/Makefile
 
 - name: compiles node
-  command: make chdir=/var/local/node-v0.10.32 creates=/var/local/node-v0.10.32/node
+  command: make chdir=/var/local/node-v{{node_version}} creates=/var/local/node-v{{node_version}}/node
 
 - name: installs node
-  command: make install chdir=/var/local/node-v0.10.32 creates=/usr/local/bin/node
+  command: make install chdir=/var/local/node-v{{node_version}} creates=/usr/local/bin/node

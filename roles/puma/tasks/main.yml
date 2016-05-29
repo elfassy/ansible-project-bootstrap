@@ -12,7 +12,6 @@
 
 - name: adds puma app conf
   template: src=puma.rb.j2 dest={{puma_config_path}} mode=644
-  notify: restart puma
 
 - name: creates puma pid folder
   file: path={{app_path}}/tmp/pids owner={{user}} group={{user}} state=directory
@@ -21,6 +20,8 @@
   become_user: 'root'
   command: update-rc.d -f puma defaults
 
+- name: start puma
+  service: name=puma state=started
 # - name: adds puma to upstart
 #   template: src=upstart.conf.j2 dest=/etc/init/puma.conf
 #   notify: restart puma

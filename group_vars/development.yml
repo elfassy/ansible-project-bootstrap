@@ -1,1 +1,8 @@
-letsencrypt_server: https://acme-staging.api.letsencrypt.org/directory
+---
+
+rails_env: development
+user: vagrant
+environment_variables:
+  HOST: locahost:3000
+  ENCRYPTION_KEY: fe3d1ef5c4c6cea6138cfce1090ce72d066907b46dca6975a42c87a426d596369feb5cc0874d144eaa71f2edb9615904e8188945d393d88fbf52b9bdd1209168
+  LANG: en_US.UTF-8

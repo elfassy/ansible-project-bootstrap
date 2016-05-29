@@ -1,5 +1,4 @@
 db_user: '{{ user }}'
 db_password: password
 db_name: '{{app_name}}'
-db_host: localhost
 # don't modify this file

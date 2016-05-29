@@ -15,9 +15,9 @@ localhost
 [worker]
 localhost
 
-[web:vars]
-app_path=/app
-rails_env=development
-user=vagrant
-repository=git@bitbucket.org:melfassy/foreverlabs.git
-app_name=foreverlabs
+[development:children]
+app
+web
+database
+cache
+worker

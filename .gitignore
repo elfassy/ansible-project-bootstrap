@@ -6,3 +6,7 @@ deploy_*
 group_vars/production/config.yml
 group_vars/production.yml
 *.retry
+
+group_vars/staging.yml
+
+inventory/staging

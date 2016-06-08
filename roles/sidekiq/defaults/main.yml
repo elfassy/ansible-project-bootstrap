@@ -1,3 +1,2 @@
 ---
-sidekiq_app_name: "{{app_name}}_sidekiq"
-sidekiq_command: sidekiq
+sidekiq_app_name: sidekiq

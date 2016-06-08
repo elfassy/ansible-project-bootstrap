@@ -10,10 +10,11 @@
   roles:
     - dev
     - git
+    - swap
     - postgresql-client
     - rails
     - puma
-    - nginx
+    - { role: nginx,  ssl_on: false }
     - redis
     - sidekiq
     - ssl

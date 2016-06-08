@@ -11,6 +11,7 @@
 
 
 # You will need to modify these
+APP="{{sidekiq_app_name}}"
 AS_USER="{{ user }}"
 APP_DIR="{{ app_path }}"
 
@@ -28,12 +29,17 @@ CMD="cd ${APP_DIR}; ${START_CMD} >> ${LOG_FILE} 2>&1 &"
 
 RETVAL=0
 
+restart(){
+  stop
+  start
+}
 
 start() {
 
-  status
-  if [ $? -eq 1 ]; then
-
+  check_pid
+  if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
+    echo "$SIDEKIQ message processor is already running .. "
+  else
     [ `id -u` == '0' ] || (echo "$SIDEKIQ runs as root only .."; exit 5)
     [ -d $APP_DIR ] || (echo "$APP_DIR not found!.. Exiting"; exit 6)
     cd $APP_DIR
@@ -46,26 +52,38 @@ start() {
     sleep 8
     [ $RETVAL -eq 0 ] && touch $LOCK_FILE
     return $RETVAL
-  else
-    echo "$SIDEKIQ message processor is already running .. "
   fi
 
 
 }
 
 stop() {
-
+  check_pid
+  if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     echo "Stopping $SIDEKIQ message processor .."
     SIG="INT"
     kill -$SIG `cat  $PID_FILE`
     RETVAL=$?
     [ $RETVAL -eq 0 ] && rm -f $LOCK_FILE
     return $RETVAL
+  else
+    echo "$SIDEKIQ message processor is already stopped .. "
+  fi
+}
+
+check_pid(){
+  if [ -f $PID_FILE ]; then
+    PID=`cat $PID_FILE`
+    STATUS=`ps aux | grep $PID | grep -v grep | wc -l`
+  else
+    STATUS=0
+    PID=0
+  fi
 }
 
 status() {
 
-  ps -ef | grep 'sidekiq [0-9]*.[0-9]*.[0-9]*' | grep -v grep
+  ps -ef | grep 'sidekiq [0-9].[0-9].[0-9]' | grep -v grep
   return $?
 }
 
@@ -76,6 +94,9 @@ case "$1" in
         ;;
     stop)
         stop
+        ;;
+    restart)
+        restart
         ;;
     status)
         status
@@ -89,7 +110,7 @@ case "$1" in
          fi
         ;;
     *)
-        echo "Usage: $0 {start|stop|status}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 0
         ;;
 esac

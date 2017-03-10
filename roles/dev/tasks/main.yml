@@ -7,3 +7,5 @@
     - autoconf
     - build-essential
     - language-pack-en
+    - python-setuptools
+    - python-dev

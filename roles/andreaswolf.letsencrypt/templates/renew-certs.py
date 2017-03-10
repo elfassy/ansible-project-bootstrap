@@ -44,3 +44,9 @@ for cert in certs:
         f = open(cert['certpath'], 'w')
         f.write(output)
         f.close()
+
+    with open(cert['chainedcertpath'], 'wb') as outFile:
+        with open(cert['certpath'], 'rb') as com, open('{{letsencrypt_intermediate_cert_path}}', 'rb') as fort13:
+            outFile.write(com.read())
+            outFile.write(fort13.read())
+            outFile.close()

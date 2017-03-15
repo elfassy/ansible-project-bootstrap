@@ -1,7 +1,7 @@
-{{ app_path }}/log/{{ rails_env }}.log {
-  daily
+{{ app_path }}/log/*.log {
+  weekly
   missingok
-  rotate 7
+  rotate 8
   compress
   delaycompress
   notifempty

@@ -7,14 +7,20 @@ upstream {{ app_name }} {
 
 {% if ssl_on %}
 server {
-  listen 80 default_server;
-  listen [::]:80 default_server;
-{% if host is defined %}
-  server_name {{ host }};
-{% else %}
-  server_name _;
-{% endif %}
-  return 301 https://$server_name$request_uri;
+  {% if host is defined %}
+    listen 80;
+    server_name {{ host }};
+  {% else %}
+    listen 80 default_server;
+    listen [::]:80 default_server;
+  {% endif %}
+  location ^~ /.well-known/acme-challenge {
+    default_type "text/plain";
+    alias {{ acme_tiny_challenges_directory }};
+  }
+  location / {
+    return 301 https://$server_name$request_uri;
+  }
 }
 {% endif %}
 
@@ -34,6 +40,7 @@ server {
     server_name {{ host }};
   {% else %}
     listen 80 default_server;
+    listen [::]:80 default_server;
   {% endif %}
 {% endif %}
 
@@ -68,7 +75,8 @@ server {
     proxy_pass http://{{ app_name }};
   }
 
-  location /.well-known/acme-challenge {
+  location ^~ /.well-known/acme-challenge {
+    default_type "text/plain";
     alias {{ acme_tiny_challenges_directory }};
   }
 }

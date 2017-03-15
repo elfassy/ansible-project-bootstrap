@@ -22,8 +22,7 @@ for cert in certs:
 
     print "Generating certificate for " + host
     args = [
-        "/usr/bin/env", "python", script,
-
+        "python", script,
         "--account-key",
         "{{ letsencrypt_account_key }}",
         "--csr",
@@ -33,7 +32,7 @@ for cert in certs:
     ]
 
     cmd = "/usr/bin/env " + " ".join(args)
-
+    print cmd
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.stdout.read()
     p.stdin.close()
@@ -41,10 +40,12 @@ for cert in certs:
         print "error while generating certificate for " + host
         print p.stderr.read()
     else:
+        print "Writing file " + cert['certpath']
         f = open(cert['certpath'], 'w')
         f.write(output)
         f.close()
 
+    print "Writing file " + "{{letsencrypt_intermediate_cert_path}}"
     with open(cert['chainedcertpath'], 'wb') as outFile:
         with open(cert['certpath'], 'rb') as com, open('{{letsencrypt_intermediate_cert_path}}', 'rb') as fort13:
             outFile.write(com.read())

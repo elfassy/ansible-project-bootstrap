@@ -1,9 +1,9 @@
+---
 - name: installs sidekiq
-  command: gem install sidekiq creates=/usr/local/bin/{{ sidekiq_app_name }}
+  command: gem install sidekiq creates=/usr/local/bin/sidekiq
 
-- name: adds sidekiq init script
-  template: src=sidekiq.j2 dest=/etc/init.d/{{ sidekiq_app_name }} mode=755
+- name: ensure sidekiq init.d config is created
+  template: src=initd_sidekiq.j2 dest=/etc/init.d/sidekiq mode=0755
 
-- name: adds sidekiq to upstart
-  command: update-rc.d -f {{ sidekiq_app_name }} defaults
-  notify: restart sidekiq
+- name: ensure sidekiq starts on a fresh reboot
+  service: name=sidekiq state=started enabled=yes

@@ -1,4 +1,5 @@
 ---
 dependencies:
+  # - { role: nginx,  ssl_on: false }
   - { role: andreaswolf.letsencrypt }
   - { role: nginx,  ssl_on: true }

@@ -1,2 +1,8 @@
----
-sidekiq_app_name: sidekiq
+rails_app_name: "{{app_name}}"
+rails_deploy_user: "{{ user }}"
+rails_deploy_path: "{{ app_path }}"
+rails_bundle: 'bundle'
+sidekiq_config_path: "{{ rails_deploy_path }}/config/sidekiq.yml"
+sidekiq_log_path: "-L {{ rails_deploy_path }}/log/sidekiq.log"
+sidekiq_app_name: 'sidekiq'
+sidekiq_force_restart: false

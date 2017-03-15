@@ -1,20 +1,25 @@
 ---
-- hosts: database
-  become: true
-  roles:
-    - dev
-    - postgresql-server
+# - hosts: database
+#   become: true
+#   roles:
+#     - dev
+#     - postgresql-server
+#   gather_facts: no
+#   pre_tasks:
+#     - name: 'install python2'
+#       raw: sudo apt-get -y install python-simplejson
 
 - hosts: web
   become: true
   roles:
-    - dev
-    - git
-    - swap
-    - postgresql-client
-    - rails
-    - puma
-    - { role: nginx,  ssl_on: false }
-    - redis
-    - sidekiq
+    # - dev
+    # - git
+    # - swap
+    # - postgresql-client
+    # - yarn
+    # - rails
+    # - puma
+    # - { role: nginx,  ssl_on: false }
+    # - redis
+    # - sidekiq
     - ssl

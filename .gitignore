@@ -10,3 +10,7 @@ group_vars/production.yml
 group_vars/staging.yml
 
 inventory/staging
+
+roles/nginx/.DS_Store
+
+.DS_Store

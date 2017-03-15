@@ -1,1 +1,9 @@
-node_version: 0.10.32
+# defaults file for nodejs
+---
+nodejs_version: 'nodejs-v7x'
+
+nodejs_install:
+  # To compile and install native addons from npm you may also need to install build tools
+  - build-essential
+
+nodejs_npm_packages: []

@@ -1,0 +1,274 @@
+#! /bin/bash
+
+# {{ ansible_managed }}
+# Manual customization of this file is not recommended.
+
+# Heavily inspired by: https://github.com/gitlabhq/gitlabhq
+
+### BEGIN INIT INFO
+# Provides:          sidekiq
+# Required-Start:    $local_fs $remote_fs $network
+# Required-Stop:     $local_fs $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Manage a rails sidekiq worker
+# Description:       Manage a rails sidekiq worker
+### END INIT INFO
+
+# ---------------------------------------------------------------------------
+# configuration options
+# ---------------------------------------------------------------------------
+app_name="{{ rails_app_name }}"
+app_user="{{ rails_deploy_user }}"
+app_root="{{ rails_deploy_path }}"
+bundle="{{ rails_bundle }} exec"
+
+pid_path="$app_root/tmp/pids"
+
+sidekiq_pid_path="$pid_path/sidekiq.pid"
+sidekiq_config_switch="-C {{ sidekiq_config_path }} -e {{ rails_env }} -P $sidekiq_pid_path"
+sidekiq_log_command="{{ sidekiq_log_path }}"
+
+# ---------------------------------------------------------------------------
+# source the environment, ensure correct user, switch into the app's path
+# ---------------------------------------------------------------------------
+if ! . /etc/default/"$app_name" ; then
+ echo "failed to source environment for $app_name, exiting"; exit 1;
+fi
+
+if [ "$USER" != "$app_user" ]; then
+  eval su - "$app_user" -c $(echo \")$0 "$@"$(echo \"); exit;
+fi
+
+if ! cd "$app_root" ; then
+ echo "failed to cd into $app_root, exiting"; exit 1;
+fi
+
+# ---------------------------------------------------------------------------
+# private commands related to sidekiq
+# ---------------------------------------------------------------------------
+# sidekiq_start(){
+#   $bundle bin/sidekiq $sidekiq_config_switch -d $sidekiq_log_command
+# }
+
+# sidekiq_stop(){
+#   $bundle bin/sidekiqctl stop $sidekiq_pid_path
+# }
+
+sidekiq_start(){
+  $bundle sidekiq $sidekiq_config_switch -d $sidekiq_log_command
+}
+
+sidekiq_stop(){
+  $bundle sidekiqctl stop $sidekiq_pid_path
+}
+
+# ---------------------------------------------------------------------------
+# get the pid from the file
+# ---------------------------------------------------------------------------
+check_pids(){
+  if ! mkdir -p "$pid_path"; then
+    echo "could not create the path $pid_path needed to store the pids"; exit 1
+  fi
+  if [ -f "$sidekiq_pid_path" ]; then
+    spid=$(cat "$sidekiq_pid_path")
+  else
+    spid=0
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# used after starting the app service and are waiting for its pid
+# ---------------------------------------------------------------------------
+wait_for_pids(){
+  # sleep for a bit to give it time
+  i=0;
+  while [ ! -f $sidekiq_pid_path ]; do
+    sleep 0.1;
+    i=$((i+1))
+    if [ $((i%10)) = 0 ]; then
+      echo -n "."
+    elif [ $((i)) = 301 ]; then
+      echo "waited 30s for the process to write its pid, something went wrong, exiting"
+      exit 1;
+    fi
+  done
+  echo
+}
+
+# ---------------------------------------------------------------------------
+# always check the pid
+# ---------------------------------------------------------------------------
+check_pids
+
+# ---------------------------------------------------------------------------
+# determine if sidekiq is running or not
+# ---------------------------------------------------------------------------
+check_status(){
+  check_pids
+
+  # if sidekiq is running kill -0 $sidekiq_pid returns true, or rather 0
+  # checks of *_status should only check for == 0 or != 0, never anything else
+  if [ $spid -ne "0" ]; then
+    kill -0 "$spid" 2>/dev/null
+    sidekiq_status="$?"
+  else
+    sidekiq_status="-1"
+  fi
+  if [ $sidekiq_status = 0 ]; then
+    exit_status=0
+  else
+    # http://refspecs.linuxbase.org/LSB_4.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+    # code 3 means 'program is not running'
+    exit_status=3
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# check for stale pids and remove them if necessary
+# ---------------------------------------------------------------------------
+check_stale_pids(){
+  check_status
+  # if there is a pid it is something else than 0, the service is running if
+  # *_status is == 0
+  if [ "$spid" != "0" -a "$sidekiq_status" != "0" ]; then
+    echo "removing stale sidekiq pid, this is most likely caused by sidekiq crashing the last time it ran"
+    if ! rm "$sidekiq_pid_path"; then
+      echo "unable to remove stale pid, exiting"
+      exit 1
+    fi
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# nothing is running so it is safe to exit
+# ---------------------------------------------------------------------------
+exit_if_not_running(){
+  check_stale_pids
+  if [ "$sidekiq_status" != "0" ]; then
+    echo "sidekiq is not running"
+    exit
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# start sidekiq if it is not running
+# ---------------------------------------------------------------------------
+start_app() {
+  check_stale_pids
+
+  if [ "$sidekiq_status" != "0" ]; then
+    echo -n "starting sidekiq"
+  fi
+
+  # then check if the service is running
+  # if it is, don't start again
+  if [ "$sidekiq_status" = "0" ]; then
+    echo "sidekiq is already running with pid $spid, not restarting"
+  else
+    sidekiq_start
+  fi
+
+  # wait for the pids to be planted
+  wait_for_pids
+
+  # finally check the status to tell wether or not sidekiq is running
+  print_status
+}
+
+# ---------------------------------------------------------------------------
+# stop sidekiq if it is running
+# ---------------------------------------------------------------------------
+stop_app() {
+  exit_if_not_running
+
+  # if sidekiq is running, stop it
+  if [ "$sidekiq_status" = "0" ]; then
+    echo -n "shutting down sidekiq"
+    sidekiq_stop
+  fi
+
+  # if something needs to be stopped, wait for it because using SIGKILL is bad in a script
+  while [ "$sidekiq_status" = "0" ]; do
+    sleep 1
+    check_status
+    printf "."
+    if [ "$sidekiq_status" != "0" ]; then
+      printf "\n"
+      break
+    fi
+  done
+
+  sleep 1
+
+  # clean up the pid file
+  rm "$sidekiq_pid_path" 2>/dev/null
+
+  print_status
+}
+
+# ---------------------------------------------------------------------------
+# output the status of sidekiq
+# ---------------------------------------------------------------------------
+print_status() {
+  check_status
+  if [ "$sidekiq_status" != "0" ]; then
+    echo "sidekiq is not running"
+    return
+  fi
+  if [ "$sidekiq_status" = "0" ]; then
+      echo "sidekiq with pid $spid is running"
+  else
+      printf "sidekiq is \033[31mnot running\033[0m\n"
+  fi
+  if [ "$sidekiq_status" = "0" ]; then
+    printf "sidekiq is \033[32mup and running\033[0m\n"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# restart sidekiq by stopping it and then starting it
+# ---------------------------------------------------------------------------
+restart_app(){
+  check_status
+  if [ "$sidekiq_status" = "0" ]; then
+    stop_app
+  fi
+  start_app
+}
+
+# ---------------------------------------------------------------------------
+# reload sidekiq
+# ---------------------------------------------------------------------------
+reload_app(){
+  echo -n "reloading is not possible, restarting instead"
+  restart_app
+}
+
+# ---------------------------------------------------------------------------
+# handle the input
+# ---------------------------------------------------------------------------
+case "$1" in
+  start)
+        start_app
+        ;;
+  stop)
+        stop_app
+        ;;
+  restart)
+        restart_app
+        ;;
+  reload|force-reload)
+        reload_app
+        ;;
+  status)
+        print_status
+        exit $exit_status
+        ;;
+  *)
+        echo "Usage: service sidekiq {start|stop|restart|reload|status}"
+        exit 1
+        ;;
+esac
+
+exit

@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  remote_user: travis
+  sudo: true
+  vars:
+    rails_deploy_user: travis
+    rails_deploy_to: /tmp/app
+    rails_ssh_keypair_local_path: /tmp
+    rails_git_url: "file:///home/travis/build/nickjj/ansible-sidekiq/tests/railsapp"
+
+    rails_env:
+      RAILS_ENV: production
+      CACHE_HOST: localhost
+
+  roles:
+    - nickjj.ruby
+    - nickjj.rails
+    - ansible-sidekiq

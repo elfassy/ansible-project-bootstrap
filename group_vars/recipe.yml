@@ -1,0 +1,33 @@
+---
+git_branch: 'master'
+app_name: favorite-recipies
+rails_env: production
+user: deployer
+environment_variables:
+  RACK_ENV: production
+  LANG: en_US.UTF-8
+  XDG_RUNTIME_DIR: '/tmp/{{user}}'
+  HOST: 'recipies.elfassy.pro'
+  ENCRYPTION_KEY: 5790f3e15e1669500f0948ec9ee721522604b0d5bf955e89c21a6d3d2994607f0eb30fc2392598df5d6bbdc487c7df06cf0ef2df9f3b2235479db862081980bb
+  SECRET_KEY_BASE: fd30cd59362e91264bd031de9dc8047bc49c1e522c1bf1783b05f0464e9368518ea3932252abce82f61ed424737f9c836b087a64eb34a6fe4badb28bafe68096
+  RAILS_MASTER_KEY: 
+repository: git@bitbucket.org:melfassy/favorite-recipies.git
+ansible_ssh_user: 'root'
+# ansible_ssh_private_key_file: ~/.ssh/github_rsa
+github_user: elfassy #for ssh keys
+db_user: michaelelfassy
+app_path: /apps/{{app_name}}
+letsencrypt_key_dir: '/etc/ssl/letsencrypt/keys'
+letsencrypt_certs_dir: '/etc/ssl/letsencrypt/certs'
+ssl_certificate_path: "{{letsencrypt_certs_dir}}/{{app_name}}.pem"
+ssl_certificate_key_path: "/etc/ssl/private/{{app_name}}.key"
+acme_tiny_challenges_directory: /apps/{{app_name}}/public/acme-challenge
+letsencrypt_certs:
+  -
+    name: "{{app_name}}_keys"
+    keypath: "{{ssl_certificate_key_path}}"
+    certpath: "{{letsencrypt_certs_dir}}/{{app_name}}.cert"
+    chainedcertpath: "{{ssl_certificate_path}}"
+    host: 
+      - "recipies.elfassy.pro"
+

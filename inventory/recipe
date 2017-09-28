@@ -1,0 +1,11 @@
+web1 ansible_ssh_host=104.236.238.149 ansible_become_method=su ansible_become_exe="sudo -HE su"
+
+[web]
+web1
+
+[database]
+web1
+
+[production:children]
+database
+web
